@@ -1,0 +1,135 @@
+---
+
+dependency:
+  name: galaxy
+  enabled: yes
+  options:
+    ignore-certs: yes
+    ignore-errors: yes
+    role-file: "${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml"
+    requirements-file: "${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml"
+driver:
+  name: podman
+# Vagrant driver
+# driver:
+#   name: vagrant
+#   provider:
+#     name: virtualbox
+lint: "${MOLECULE_SCENARIO_DIRECTORY}/linters.sh"
+platforms:
+  - name: "centos6-${INSTANCE_UUID:-1}"
+    image: quay.io/centos/centos:centos6
+    dockerfile: Dockerfile.centos6.j2
+    # Only required for systemd enabled containers
+    # dockerfile: Dockerfile.systemd.j2
+    # command: /sbin/init
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - molecule_hosts
+      - molecule_hosts_centos
+      - molecule_hosts_centos_6
+  - name: "centos7-${INSTANCE_UUID:-1}"
+    image: quay.io/centos/centos:centos7
+    # Only required for systemd enabled containers
+    # dockerfile: Dockerfile.systemd.j2
+    # command: /sbin/init
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - molecule_hosts
+      - molecule_hosts_centos
+      - molecule_hosts_centos_7
+  - name: "centos8-${INSTANCE_UUID:-1}"
+    image: quay.io/centos/centos:stream8
+    # Only required for systemd enabled containers
+    # dockerfile: Dockerfile.systemd.j2
+    # command: /sbin/init
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - molecule_hosts
+      - molecule_hosts_centos
+      - molecule_hosts_centos_8
+  - name: "fedora34-${INSTANCE_UUID:-1}"
+    image: quay.io/fedora/fedora:34
+    # Only required for systemd enabled containers
+    # dockerfile: Dockerfile.systemd.j2
+    # command: /sbin/init
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - molecule_hosts
+      - molecule_hosts_fedora
+      - molecule_hosts_fedora_34
+  - name: "fedora35-${INSTANCE_UUID:-1}"
+    image: quay.io/fedora/fedora:35
+    # Only required for systemd enabled containers
+    # dockerfile: Dockerfile.systemd.j2
+    # command: /sbin/init
+    # tmpfs:
+    #   - /run
+    #   - /tmp
+    # volumes:
+    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - molecule_hosts
+      - molecule_hosts_fedora
+      - molecule_hosts_fedora_35
+
+    # # Vagrant platform
+    # - name: "centos7-${INSTANCE_UUID:-1}"
+    #   box: centos/7
+    #   memory: 2048
+    #   groups:
+    #     - molecule_hosts
+    #     - molecule_hosts_centos
+    #     - molecule_hosts_centos_7
+    # - name: "centos8-${INSTANCE_UUID:-1}"
+    #   box: centos/stream8
+    #   memory: 2048
+    #   groups:
+    #     - molecule_hosts
+    #     - molecule_hosts_centos
+    #     - molecule_hosts_centos_8
+    # - name: "fedora34-${INSTANCE_UUID:-1}"
+    #   box: fedora/34-cloud-base
+    #   memory: 3072
+    #   groups:
+    #     - molecule_hosts
+    #     - molecule_hosts_fedora
+    #     - molecule_hosts_fedora_34
+    # - name: "fedora35-${INSTANCE_UUID:-1}"
+    #   box: fedora/35-cloud-base
+    #   memory: 2048
+    #   groups:
+    #     - molecule_hosts
+    #     - molecule_hosts_fedora
+    #     - molecule_hosts_fedora_35
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: profile_tasks
+      action_plugins: $PWD/action_plugins
+  inventory:
+    hosts:
+      molecule_hosts:
+        vars:
+      molecule_hosts_fedora:
+        vars:
+          ansible_python_interpreter: /usr/bin/python3
+verifier:
+  name: ansible
