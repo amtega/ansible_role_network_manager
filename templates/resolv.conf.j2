@@ -1,0 +1,10 @@
+domain {{ network_manager_dns_domain }}
+{% if network_manager_dns_search is defined and network_manager_dns_search | length > 0 %}
+search {{ network_manager_dns_search | join(" ")}}
+{% endif %}
+{% for server in network_manager_dns_nameserver %}
+nameserver {{ server }}
+{% endfor %}
+{% if network_manager_dns_options is defined and network_manager_dns_options | length > 0 %}
+options {{ network_manager_dns_options | join(" ") }}
+{% endif %}

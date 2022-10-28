@@ -1,0 +1,5 @@
+{% for route in interface.routes | default([]) %}
+- {{ route.net }}  {{ route.gateway }}
+{% else %}
+[]
+{% endfor %}

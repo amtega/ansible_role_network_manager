@@ -1,0 +1,33 @@
+---
+# Kernel config tasks
+
+- name: Setup kernel modules centos 6
+  block:
+    - name: Configure 802.1q module
+      ansible.builtin.copy:
+        dest: /etc/sysconfig/modules/8021q.modules
+        content: >-
+          #!/bin/sh
+          modprobe 8021q >/dev/null 2>&1
+        mode: 0755
+      when: >-
+        network_interfaces
+        | selectattr("vlanid", "defined")
+        | list
+        | length > 0
+
+    - name: Configure bonding module
+      ansible.builtin.copy:
+        dest: /etc/sysconfig/modules/bonding.modules
+        content: >-
+          #!/bin/sh
+          modprobe bonding >/dev/null 2>&1
+        mode: 0755
+      when: >-
+        network_interfaces
+        | selectattr("bond_master", "defined")
+        | list
+        | length > 0
+  tags:
+    - role::network_interfaces
+    - role::network_manager::kernel_modules
