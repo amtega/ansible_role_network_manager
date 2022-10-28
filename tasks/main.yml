@@ -1,2 +1,57 @@
 ---
 # Role tasks
+
+- name: Setup network interfaces configuration
+  block:
+    - ansible.builtin.include_tasks: prerequisites.yml
+
+    - ansible.builtin.include_tasks: facts.yml
+      tags:
+        - role::network_manager::facts
+
+    - ansible.builtin.include_tasks: cleanup.yml
+      tags:
+        - role::network_manager::cleanup
+
+    - ansible.builtin.include_tasks: disable_ipv6.yml
+
+      tags:
+        - role::network_manager::ipv6
+
+    - ansible.builtin.include_tasks: hostname.yml
+      tags:
+        - role::network_manager::hostname
+
+    - ansible.builtin.include_tasks: dns.yml
+      tags:
+        - role::network_manager::dns
+
+    - ansible.builtin.include_tasks: kernel_modules.yml
+      tags:
+        - role::network_manager::kernel_modules
+
+    - ansible.builtin.include_tasks: udev.yml
+      tags:
+        - role::network_manager::udev
+
+    - ansible.builtin.include_tasks: ifcfg.yml
+      tags:
+        - role::network_manager::ifcfg
+
+    - ansible.builtin.include_tasks: ifcfg-vlan.yml
+      tags:
+        - role::network_manager::ifcfg
+
+    - ansible.builtin.include_tasks: bonding.yml
+      tags:
+        - role::network_manager::bonding
+
+    - ansible.builtin.include_tasks: mtu.yml
+      tags:
+        - role::network_manager::mtu
+
+    - ansible.builtin.include_tasks: clean_arp.yml
+      tags:
+        - role::network_manager::service
+  tags:
+    - role::network_interfaces

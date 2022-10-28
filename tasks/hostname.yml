@@ -1,0 +1,9 @@
+---
+# Hostname config tasks
+
+- name: Setup hostname
+  ansible.builtin.hostname:
+    name: "{{ network_manager_hostname }}"
+  tags:
+    - role::network_interfaces
+    - role::network_manager::hostname

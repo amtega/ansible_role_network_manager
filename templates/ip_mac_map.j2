@@ -1,0 +1,16 @@
+{% set ns = namespace(found=false) %}
+{% for interface in ansible_facts.interfaces %}
+{% set interface_var = interface | regex_replace("-", "_") %}
+{% if  ansible_facts[interface_var] is defined
+       and ansible_facts[interface_var].ipv4 is defined
+       and ansible_facts[interface_var].ipv4.address is defined
+       and ansible_facts[interface_var].macaddress is defined %}
+
+{% set ns.found = true %}
+{{ ansible_facts[interface_var].ipv4.address }}: {{ ansible_facts[interface_var].macaddress }}
+{% endif %}
+{% endfor %}
+
+{% if not ns.found %}
+{}
+{% endif %}

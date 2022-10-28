@@ -1,0 +1,96 @@
+---
+# Prerequisites
+
+- name: Setup prerequisites
+  block:
+    - name: Setup proxy client
+      ansible.builtin.include_role:
+        name: amtega.proxy_client
+      vars:
+        proxy_client_permanent: no
+
+    - name: Setup packages
+      ansible.builtin.include_role:
+        name: amtega.packages
+      vars:
+        packages_os:
+          all:
+            NetworkManager: present
+            NetworkManager-glib: present
+
+    - name: Setup grub options
+      ansible.builtin.include_role:
+        name: amtega.grub_options
+      when: ansible_facts.distribution_version is version_compare("7", ">=")
+      vars:
+        grub_options_present:
+          - "net.ifnames=0"
+          - "biosdevname=0"
+
+    - name: Setup sysctl
+      ansible.builtin.include_role:
+        name: amtega.sysctl
+      vars:
+        sysctl_load_from_hostvars: no
+        sysctl:
+          - name: disable_ipv6
+            options:
+              - name: net.ipv6.conf.all.disable_ipv6
+                value: 1
+                reload: yes
+                sysctl_set: yes
+                state: present
+              - name: net.ipv6.conf.default.disable_ipv6
+                value: 1
+                reload: yes
+                sysctl_set: yes
+                state: present
+
+    - name: Configure NetworkManager to create itcfg-rh config files
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/ifcfg-rh.conf
+        content: |
+          [main]
+          plugins=ifcfg-rh,keyfile
+        owner: root
+        group: root
+        mode: '0644'
+      register: networkmanager_config_init_result
+
+    - name: Configure NetworkManager not to create connections by default
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/auto.conf
+        content: |
+          [main]
+          no-auto-default=*
+        owner: root
+        group: root
+        mode: '0644'
+      register: networkmanager_config_auto_default_result
+
+    - name: Configure NetworkManager not to create connections by default
+      ansible.builtin.copy:
+        dest: /etc/NetworkManager/conf.d/dns_none.conf
+        content: |
+          [main]
+          dns=none
+        owner: root
+        group: root
+        mode: '0644'
+      register: networkmanager_config_dns_none_result
+
+    - name: Enable network service
+      ansible.builtin.service:
+        name: NetworkManager
+        state: restarted
+        enabled: yes
+      when: >-
+        networkmanager_config_init_result.changed
+        or networkmanager_config_auto_default_result.changed
+        or networkmanager_config_dns_none_result.changed
+
+    - name: Prepare reboot
+      ansible.builtin.include_role:
+        name: amtega.reboot
+  vars:
+    packages_load_from_hostvars: no

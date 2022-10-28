@@ -1,2 +1,15 @@
 ---
 # Role variables
+
+# Paths
+
+network_devices_udev_persistent_rules_path: >-
+  /etc/udev/rules.d/70-persistent-net.rules
+
+network_devices_scripts_dir: /etc/sysconfig/network-scripts
+
+network_devices_resolv_config_path: /etc/resolv.conf
+
+network_devices_network_config_path: /etc/sysconfig/network
+
+network_devices_bonding_config_path: /etc/modprobe.d/bonding.conf

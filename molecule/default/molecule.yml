@@ -6,118 +6,82 @@ dependency:
   options:
     ignore-certs: yes
     ignore-errors: yes
-    role-file: "${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml"
-    requirements-file: "${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml"
+    role-file: >-
+      ${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml
+    requirements-file: >-
+      ${MOLECULE_SCENARIO_DIRECTORY}/requirements.yml
 driver:
-  name: podman
-# Vagrant driver
-# driver:
-#   name: vagrant
-#   provider:
-#     name: virtualbox
+  name: vagrant
 lint: "${MOLECULE_SCENARIO_DIRECTORY}/linters.sh"
 platforms:
-  - name: "centos6-${INSTANCE_UUID:-1}"
-    image: quay.io/centos/centos:centos6
-    dockerfile: Dockerfile.centos6.j2
-    # Only required for systemd enabled containers
-    # dockerfile: Dockerfile.systemd.j2
-    # command: /sbin/init
-    # tmpfs:
-    #   - /run
-    #   - /tmp
-    # volumes:
-    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    groups:
-      - molecule_hosts
-      - molecule_hosts_centos
-      - molecule_hosts_centos_6
   - name: "centos7-${INSTANCE_UUID:-1}"
-    image: quay.io/centos/centos:centos7
-    # Only required for systemd enabled containers
-    # dockerfile: Dockerfile.systemd.j2
-    # command: /sbin/init
-    # tmpfs:
-    #   - /run
-    #   - /tmp
-    # volumes:
-    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    box: centos/7
+    memory: 2048
+    interfaces:
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+    config_options:
+      ssh.forward_agent: yes
+      ssh.forward_x11: yes
     groups:
       - molecule_hosts
       - molecule_hosts_centos
       - molecule_hosts_centos_7
   - name: "centos8-${INSTANCE_UUID:-1}"
-    image: quay.io/centos/centos:stream8
-    # Only required for systemd enabled containers
-    # dockerfile: Dockerfile.systemd.j2
-    # command: /sbin/init
-    # tmpfs:
-    #   - /run
-    #   - /tmp
-    # volumes:
-    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    box: centos/stream8
+    memory: 2048
+    interfaces:
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+    config_options:
+      ssh.forward_agent: yes
+      ssh.forward_x11: yes
     groups:
       - molecule_hosts
       - molecule_hosts_centos
       - molecule_hosts_centos_8
   - name: "fedora34-${INSTANCE_UUID:-1}"
-    image: quay.io/fedora/fedora:34
-    # Only required for systemd enabled containers
-    # dockerfile: Dockerfile.systemd.j2
-    # command: /sbin/init
-    # tmpfs:
-    #   - /run
-    #   - /tmp
-    # volumes:
-    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    box: fedora/34-cloud-base
+    memory: 3072
+    interfaces:
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+    config_options:
+      ssh.forward_agent: yes
+      ssh.forward_x11: yes
     groups:
       - molecule_hosts
       - molecule_hosts_fedora
       - molecule_hosts_fedora_34
   - name: "fedora35-${INSTANCE_UUID:-1}"
-    image: quay.io/fedora/fedora:35
-    # Only required for systemd enabled containers
-    # dockerfile: Dockerfile.systemd.j2
-    # command: /sbin/init
-    # tmpfs:
-    #   - /run
-    #   - /tmp
-    # volumes:
-    #   - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    box: fedora/35-cloud-base
+    interfaces:
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+      - network_name: private_network
+        type: dhcp
+    config_options:
+      ssh.forward_agent: yes
+      ssh.forward_x11: yes
+    memory: 2048
     groups:
       - molecule_hosts
       - molecule_hosts_fedora
       - molecule_hosts_fedora_35
-
-    # # Vagrant platform
-    # - name: "centos7-${INSTANCE_UUID:-1}"
-    #   box: centos/7
-    #   memory: 2048
-    #   groups:
-    #     - molecule_hosts
-    #     - molecule_hosts_centos
-    #     - molecule_hosts_centos_7
-    # - name: "centos8-${INSTANCE_UUID:-1}"
-    #   box: centos/stream8
-    #   memory: 2048
-    #   groups:
-    #     - molecule_hosts
-    #     - molecule_hosts_centos
-    #     - molecule_hosts_centos_8
-    # - name: "fedora34-${INSTANCE_UUID:-1}"
-    #   box: fedora/34-cloud-base
-    #   memory: 3072
-    #   groups:
-    #     - molecule_hosts
-    #     - molecule_hosts_fedora
-    #     - molecule_hosts_fedora_34
-    # - name: "fedora35-${INSTANCE_UUID:-1}"
-    #   box: fedora/35-cloud-base
-    #   memory: 2048
-    #   groups:
-    #     - molecule_hosts
-    #     - molecule_hosts_fedora
-    #     - molecule_hosts_fedora_35
 provisioner:
   name: ansible
   config_options:
@@ -128,8 +92,72 @@ provisioner:
     hosts:
       molecule_hosts:
         vars:
+          vlanid: 101
+          network_interfaces_gateway: 10.0.2.2
+          int_01: >-
+            {{ ansible_facts.eth0
+               | default(ansible_facts.int_01) }}
+          int_02: >-
+            {{ ansible_facts.eth1
+               | default(ansible_facts.int_02) }}
+          int_03: >-
+            {{ ansible_facts.eth2
+               | default(ansible_facts.int_03) }}
+          int_04: >-
+            {{ ansible_facts.eth3
+               | default(ansible_facts.int_04) }}
+
+          network_interfaces:
+            - logicalname: int-01
+              macaddress: "{{ int_01.macaddress }}"
+              ipv4:
+                - address: "{{ int_01.ipv4.address }}"
+                  cidr: >-
+                    {{ (int_01.ipv4.address
+                        + "/"
+                        + int_01.ipv4.netmask)
+                       | ansible.utils.ipaddr("prefix") }}
+              mtu: 1500
+              route_multicast: yes
+
+            - logicalname: int-02
+              macaddress: "{{ int_02.macaddress }}"
+              ipv4:
+                - address: "{{ int_02.ipv4.address }}"
+                  cidr: >-
+                    {{ (int_02.ipv4.address
+                        + "/"
+                        + int_02.ipv4.netmask)
+                       | ansible.utils.ipaddr("prefix") }}
+              routes:
+                - net: 69.0.2.0/24
+                  gateway: 69.0.2.50
+
+            - logicalname: int-03
+              macaddress: "{{ int_03.macaddress }}"
+              ipv4:
+                - address: "{{ int_03.ipv4.address }}"
+                  cidr: >-
+                    {{ (int_03.ipv4.address
+                        + "/"
+                        + int_03.ipv4.netmask)
+                       | ansible.utils.ipaddr("prefix") }}
+              mtu: 9000
+
+            - logicalname: int-04
+              macaddress: "{{ int_04.macaddress }}"
+              ipv4:
+                - address: "{{ int_04.ipv4.address }}"
+                  cidr: >-
+                    {{ (int_04.ipv4.address
+                        + "/"
+                        + int_04.ipv4.netmask)
+                       | ansible.utils.ipaddr("prefix") }}
+              mtu: 1500
+
       molecule_hosts_fedora:
         vars:
           ansible_python_interpreter: /usr/bin/python3
+
 verifier:
   name: ansible
