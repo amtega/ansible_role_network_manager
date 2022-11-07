@@ -1,0 +1,33 @@
+{% set ns = namespace(definitive_interfaces = network_interfaces
+                                              | selectattr("logicalname", "defined")
+                                              | map(attribute="logicalname")
+                                              | list
+                                              | union(["lo"]),
+                      found=false) %}
+
+{% for interface in network_interfaces | selectattr("logicalname", "defined") | list %}
+{% if interface.vlanid is defined %}
+{% set ns.definitive_interfaces = ns.definitive_interfaces
+                                  + [ interface.logicalname ~ "." ~ interface.vlanid ] %}
+{% endif %}
+{% endfor %}
+
+{% for interface in network_interfaces
+                    | selectattr("logicalname", "defined")
+                    | selectattr("routes", "undefined")
+                    | selectattr("route_multicast", "undefined")
+                    | list %}
+{% set ns.found = true %}
+- {{ network_devices_scripts_dir }}/route-{{ interface.logicalname }}
+{% endfor %}
+
+{% for interface in ansible_facts.interfaces
+                    | difference(ns.definitive_interfaces) %}
+{% set ns.found = true %}
+- {{ network_devices_scripts_dir }}/ifcfg-{{ interface }}
+- {{ network_devices_scripts_dir }}/route-{{ interface }}
+{% endfor %}
+
+{% if not ns.found %}
+[]
+{% endif %}

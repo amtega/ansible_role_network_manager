@@ -1,0 +1,46 @@
+---
+- name: Setup config vlan interfaces
+  block:
+
+    - name: Create config files for interfaces
+      community.general.nmcli:
+        type: vlan
+        conn_name: "{{ interface.logicalname }}.{{ interface.vlanid }}"
+        ifname: "{{ interface.logicalname }}.{{ interface.vlanid }}"
+        gw4: >-
+          {{ (interface.logicalname == network_manager_gateway_interface)
+             | ternary(network_interfaces_gateway, omit) }}
+        never_default4: >-
+          {{ (interface.logicalname == network_manager_gateway_interface)
+             | ternary(omit, 'yes') }}
+        mac: >-
+          {{ interface.macaddress
+          | default(network_manager_ip_mac_map[interface.ipv4.0.address]) }}
+        ip4: >-
+          {{ (interface.ipv4 | length > 1)
+             | ternary( lookup('template', 'ip_list.j2') | from_yaml | list,
+                      interface.ipv4.0.address
+                      +"/"
+                      + interface.ipv4.0.cidr ) }}
+        method6: >-
+          {{ (ansible_facts.distribution_major_version is version("8", "<"))
+             | ternary("ignore", "disabled") }}
+        routes4: "{{ lookup('template', 'routes.j2') | from_yaml | list }}"
+        state: present
+        vlandev: "{{ interface.logicalname }}"
+        vlanid: "{{ interface.vlanid | default(omit) }}"
+      loop: >-
+        {{ network_interfaces
+           | selectattr("bond_master", "undefined")
+           | selectattr("vlanid", "defined")
+           | list }}
+      loop_control:
+        loop_var: interface
+        label: "{{ interface.logicalname }}"
+      notify:
+        - reboot host
+        - wait host
+
+  tags:
+    - role::network_interfaces
+    - role::network_manager::ifcfg

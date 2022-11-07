@@ -1,0 +1,14 @@
+---
+# UDEV config tasks
+
+- name: Create udev persistent net rules
+  ansible.builtin.template:
+    src: persistent_net_rules.j2
+    dest: "{{ network_devices_udev_persistent_rules_path }}"
+    mode: 0644
+  notify:
+    - reboot host
+    - wait host
+  tags:
+    - role::network_interfaces
+    - role::network_manager::udev

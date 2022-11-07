@@ -1,0 +1,8 @@
+{{ ansible_managed | comment }}
+
+{% for interface in network_interfaces %}
+{% if interface.macaddress is defined
+      or network_manager_ip_mac_map[interface.ipv4.0.address] is defined %}
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ interface.macaddress | default(network_manager_ip_mac_map[interface.ipv4.0.address]) }}", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="*", NAME="{{ interface.logicalname }}"
+{% endif %}
+{% endfor %}

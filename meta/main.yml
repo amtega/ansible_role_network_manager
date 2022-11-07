@@ -1,23 +1,52 @@
 ---
+# Role dependencies
 
 galaxy_info:
-  role_name: role
+  role_name: network_interfaces
   namespace: amtega
-  author: author name
-  description: role description
+  author: José Enrique Mourón Regueira / Juan Antonio Valiño García
+  description: Configure ipv4 network interfaces
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
   min_ansible_version: "2.10"
   platforms:
     - name: EL
       versions:
-        - "6"
         - "7"
         - "8"
     - name: Fedora
       versions:
         - "34"
         - "35"
-  galaxy_tags: []
+  galaxy_tags:
+    - network
+    - interfaces
+    - ipv4
 
-dependencies: []
+dependencies:
+  - role: amtega.check_platform
+    vars:
+      check_platform_distributions:
+        centos: 7
+        fedora: 34
+        redhat: 7
+
+  - role: amtega.proxy_client
+    tags:
+      - never
+
+  - role: amtega.packages
+    tags:
+      - never
+
+  - role: amtega.grub_options
+    tags:
+      - never
+
+  - role: amtega.sysctl
+    tags:
+      - never
+
+  - role: amtega.reboot
+    tags:
+      - never
