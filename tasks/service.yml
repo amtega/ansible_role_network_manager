@@ -1,11 +1,10 @@
 ---
-# Service config tasks
 
-- name: Enable network service
+- name: Setup NetworkManager service
   ansible.builtin.service:
     name: NetworkManager
     state: started
     enabled: yes
   tags:
-    - role::network_interfaces
+    - role::network_manager
     - role::network_manager::service

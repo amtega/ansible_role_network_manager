@@ -1,4 +1,4 @@
-# Amtega network_interfaces role
+# Amtega network_manager role
 
 This is an [Ansible](http://www.ansible.com) role configure ipv4 network interfaces
 throught NetworkManager service.
@@ -17,13 +17,13 @@ This is an example playbook:
 
 ``` yaml
 ---
-- name: Network_interfaces role sample
+- name: Role network_manager sample
   hosts: localhost
-  roles:  
-    - amtega.network_interfaces
+  roles:
+    - amtega.network_manager
   vars:
     network_manager_hostname: "{{ inventory_hostname }}"
-    network_interfaces_gateway: 192.168.5.1
+    network_manager_gateway: 192.168.5.1
     network_manager_ipv6: no
     network_manager_dns_domain: acme.com
     network_manager_dns_search:
@@ -36,7 +36,7 @@ This is an example playbook:
       - timeout:1
       - rotate
 
-    network_interfaces:
+    network_manager_interfaces:
       - logicalname: management-01
         macaddress: 08:00:27:06:c1:f8
         ipv4:
@@ -48,7 +48,7 @@ This is an example playbook:
             gateway: 192.168.5.34
         route_multicast: no
         vlanid: 1024
-        bond: no  
+        bond: no
 ```
 
 ## Testing

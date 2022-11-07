@@ -1,32 +1,37 @@
 ---
-# MTU config tasks
 
-- name: Set mtu configuration for base interfaces
-  ansible.builtin.lineinfile:
-    path: "{{ network_devices_scripts_dir }}/ifcfg-{{ interface.logicalname }}"
-    regexp: '^MTU=(.*)$'
-    line: "MTU={{ interface.mtu | default(1500) | int }}"
-  loop: >-
-    {{ network_interfaces
-       | selectattr("bond_master", "undefined")
-       | selectattr("vlanid", "undefined")
-       | list }}
-  loop_control:
-    loop_var: interface
-    label: "{{ interface.logicalname }}"
+- name: Setup MTU
+  block:
+    - name: Set MTU for base interfaces
+      ansible.builtin.lineinfile:
+        path: >-
+          {{ network_manager_scripts_dir }}/ifcfg-{{ interface.logicalname }}
+        regexp: "^MTU=(.*)$"
+        line: "MTU={{ interface.mtu | default(1500) | int }}"
+      loop: >-
+        {{ network_manager_interfaces
+          | selectattr("bond_master", "undefined")
+          | selectattr("vlanid", "undefined")
+          | list }}
+      loop_control:
+        loop_var: interface
+        label: "{{ interface.logicalname }}"
 
-- name: Set mtu in vlan tagged interface
-  ansible.builtin.lineinfile:
-    path: >-
-      {{ network_devices_scripts_dir }}/
-      ifcfg-{{ interface.logicalname }}.{{ interface.vlanid }}
-    regexp: '^MTU=(.*)$'
-    line: "MTU={{ interface.mtu | default(1500) | int }}"
-  loop: >-
-    {{ network_interfaces
-       | selectattr("bond_master", "undefined")
-       | selectattr("vlanid", "defined")
-       | list }}
-  loop_control:
-    loop_var: interface
-    label: "{{ interface.logicalname }}"
+    - name: Set MTU for vlan tagged interfaces
+      ansible.builtin.lineinfile:
+        path: >-
+          {{ network_manager_scripts_dir }}/
+          ifcfg-{{ interface.logicalname }}.{{ interface.vlanid }}
+        regexp: "^MTU=(.*)$"
+        line: "MTU={{ interface.mtu | default(1500) | int }}"
+      loop: >-
+        {{ network_manager_interfaces
+          | selectattr("bond_master", "undefined")
+          | selectattr("vlanid", "defined")
+          | list }}
+      loop_control:
+        loop_var: interface
+        label: "{{ interface.logicalname }}"
+  tags:
+    # TODO: Enable idempotence test when nm module become idempotent
+    - molecule-idempotence-notest

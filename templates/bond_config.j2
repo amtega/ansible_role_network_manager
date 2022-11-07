@@ -1,6 +1,6 @@
 {{ ansible_managed | comment }}
 
-{% for interface in network_interfaces
+{% for interface in network_manager_interfaces
                     | selectattr("bond_options", "defined")
                     | list %}
 alias {{ interface.logicalname }} bonding
