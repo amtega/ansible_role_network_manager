@@ -1,19 +1,16 @@
 ---
-# Cleanup
 
-- name: Setup cleanup
-  block:
-    - name: Remove unnecessary config files
-      ansible.builtin.file:
-        path: "{{ network_manager_config_file }}"
-        state: absent
-      loop: >-
-        {{ lookup('template', 'files_to_clean.yml.j2') | from_yaml | unique }}
-      loop_control:
-        loop_var: network_manager_config_file
-      notify:
-        - reboot host
-        - wait host
+- name: Remove unnecessary config files
+  ansible.builtin.file:
+    path: "{{ network_manager_config_file }}"
+    state: absent
+  loop: >-
+    {{ lookup('template', 'files_to_clean.yml.j2') | from_yaml | unique }}
+  loop_control:
+    loop_var: network_manager_config_file
+  notify:
+    - reboot host
+    - wait host
   tags:
-    - role::network_interfaces
+    - role::network_manager
     - role::network_manager::cleanup
