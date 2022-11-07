@@ -1,5 +1,4 @@
 ---
-# Disable IPv6 tasks
 
 - name: Disable ipv6
   block:
@@ -24,5 +23,5 @@
       when: ansible_facts.distribution_major_version is version("6", "==")
   when: not network_manager_ipv6
   tags:
-    - role::network_interfaces
+    - role::network_manager
     - role::network_manager::ipv6

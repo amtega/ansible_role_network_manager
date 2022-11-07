@@ -5,26 +5,9 @@
   gather_facts: yes
   become: yes
   tasks:
-    - name: Setup module loading for network device in /etc/modules-load.d
+    - name: Setup network device in /etc/modules-load.d
       ansible.builtin.copy:
         content: "e1000"
         dest: /etc/modules-load.d/e1000.conf
         mode: 0644
       when: ansible_facts.distribution_major_version is version("7", ">=")
-
-    - name: Setup prepare
-      block:
-        - name: Setup python for ansible
-          ansible.builtin.yum:
-            name: libselinux-python
-            state: present
-
-        - name: >-
-            Setup module loading for network device in /etc/sysconfig/modules
-          ansible.builtin.copy:
-            content: >-
-              #!/bin/sh
-              modprobe e1000 >/dev/null 2>&1
-            dest: /etc/sysconfig/modules/e1000.modules
-            mode: 0755
-      when: ansible_facts.distribution_major_version is version("6", "==")

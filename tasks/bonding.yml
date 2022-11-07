@@ -1,16 +1,15 @@
 ---
-# Bonding setup tasks
-
 - name: Setup bonding
   block:
-    - name: Create config files for bond master interfaces
+    - name: Setup config files for bond master interfaces
       community.general.nmcli:
         type: bond
         conn_name: "{{ interface.logicalname }}"
         ifname: "{{ interface.logicalname }}"
         gw4: >-
-          {{ (interface.logicalname == network_interfaces[0].logicalname)
-             | ternary(network_interfaces_gateway, omit) }}
+          {{ (interface.logicalname
+              == network_manager_interfaces[0].logicalname)
+             | ternary(network_manager_gateway, omit) }}
         mac: >-
           {{ interface.macaddress
           | default(network_manager_ip_mac_map[interface.ipv4.0.address]) }}
@@ -26,7 +25,7 @@
         routes4: "{{ lookup('template', 'routes.j2') | from_yaml | list }}"
         state: present
       loop: >-
-        {{ network_interfaces
+        {{ network_manager_interfaces
            | selectattr("bond_options", "defined")
            | selectattr("bond_master", "undefined")
            | list }}
@@ -37,7 +36,7 @@
         - reboot host
         - wait host
 
-    - name: Create config files for bond slave interfaces
+    - name: Setup config files for bond slave interfaces
       community.general.nmcli:
         type: bond-slave
         conn_name: "{{ interface.logicalname }}"
@@ -45,7 +44,7 @@
         master: "{{ interface.bond_master }}"
         state: present
       loop: >-
-        {{ network_interfaces
+        {{ network_manager_interfaces
            | selectattr("bond_master", "defined")
            | list }}
       loop_control:
@@ -55,13 +54,13 @@
         - reboot host
         - wait host
 
-    - name: Create configuration file for bonding module
+    - name: Setup configuration file for bonding module
       ansible.builtin.template:
         src: bond_config.j2
-        dest: "{{ network_devices_bonding_config_path }}"
+        dest: "{{ network_manager_bonding_config_path }}"
         mode: 0755
       loop: >-
-        {{ network_interfaces
+        {{ network_manager_interfaces
            | selectattr("bond_options", "defined")
            | selectattr("bond_master", "undefined")
            | list }}
@@ -69,5 +68,5 @@
         loop_var: interface
         label: "{{ interface.logicalname }}"
   tags:
-    - role::network_interfaces
+    - role::network_manager
     - role::network_manager::bonding

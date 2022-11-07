@@ -93,7 +93,7 @@ provisioner:
       molecule_hosts:
         vars:
           vlanid: 101
-          network_interfaces_gateway: 10.0.2.2
+          network_manager_gateway: 10.0.2.2
           int_01: >-
             {{ ansible_facts.eth0
                | default(ansible_facts.int_01) }}
@@ -106,8 +106,7 @@ provisioner:
           int_04: >-
             {{ ansible_facts.eth3
                | default(ansible_facts.int_04) }}
-
-          network_interfaces:
+          network_manager_interfaces:
             - logicalname: int-01
               macaddress: "{{ int_01.macaddress }}"
               ipv4:
@@ -119,7 +118,6 @@ provisioner:
                        | ansible.utils.ipaddr("prefix") }}
               mtu: 1500
               route_multicast: yes
-
             - logicalname: int-02
               macaddress: "{{ int_02.macaddress }}"
               ipv4:
@@ -132,7 +130,6 @@ provisioner:
               routes:
                 - net: 69.0.2.0/24
                   gateway: 69.0.2.50
-
             - logicalname: int-03
               macaddress: "{{ int_03.macaddress }}"
               ipv4:
@@ -143,7 +140,6 @@ provisioner:
                         + int_03.ipv4.netmask)
                        | ansible.utils.ipaddr("prefix") }}
               mtu: 9000
-
             - logicalname: int-04
               macaddress: "{{ int_04.macaddress }}"
               ipv4:
@@ -154,10 +150,23 @@ provisioner:
                         + int_04.ipv4.netmask)
                        | ansible.utils.ipaddr("prefix") }}
               mtu: 1500
-
       molecule_hosts_fedora:
         vars:
           ansible_python_interpreter: /usr/bin/python3
-
+test_sequence:
+  - dependency
+  - lint
+  - cleanup
+  - destroy
+  - syntax
+  - create
+  - prepare
+  - converge
+  # TODO: Enable idempotence test when nm module become idempotent
+  - idempotence
+  - side_effect
+  - verify
+  - cleanup
+  - destroy
 verifier:
   name: ansible

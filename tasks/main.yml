@@ -1,57 +1,69 @@
 ---
-# Role tasks
 
-- name: Setup network interfaces configuration
+- name: Setup network
   block:
-    - ansible.builtin.include_tasks: prerequisites.yml
+    - name: Setup prerequisites
+      ansible.builtin.include_tasks: prerequisites.yml
 
-    - ansible.builtin.include_tasks: facts.yml
+    - name: Setup facts
+      ansible.builtin.include_tasks: facts.yml
       tags:
         - role::network_manager::facts
 
-    - ansible.builtin.include_tasks: cleanup.yml
+    - name: Cleanup
+      ansible.builtin.include_tasks: cleanup.yml
       tags:
         - role::network_manager::cleanup
 
-    - ansible.builtin.include_tasks: disable_ipv6.yml
-
+    - name: Setup ipv6
+      ansible.builtin.include_tasks: ipv6.yml
       tags:
         - role::network_manager::ipv6
 
-    - ansible.builtin.include_tasks: hostname.yml
+    - name: Setup hostname
+      ansible.builtin.include_tasks: hostname.yml
       tags:
         - role::network_manager::hostname
 
-    - ansible.builtin.include_tasks: dns.yml
+    - name: Setup dns
+      ansible.builtin.include_tasks: dns.yml
       tags:
         - role::network_manager::dns
 
-    - ansible.builtin.include_tasks: kernel_modules.yml
+    - name: Setup kernel
+      ansible.builtin.include_tasks: kernel.yml
       tags:
-        - role::network_manager::kernel_modules
+        - role::network_manager::kernel
 
-    - ansible.builtin.include_tasks: udev.yml
+    - name: Setup udev
+      ansible.builtin.include_tasks: udev.yml
       tags:
         - role::network_manager::udev
 
-    - ansible.builtin.include_tasks: ifcfg.yml
+    - name: Setup interfaces
+      ansible.builtin.include_tasks: interfaces.yml
       tags:
-        - role::network_manager::ifcfg
+        - role::network_manager::interfaces
 
-    - ansible.builtin.include_tasks: ifcfg-vlan.yml
+    - name: Setup vlans
+      ansible.builtin.include_tasks: vlans.yml
       tags:
-        - role::network_manager::ifcfg
+        - role::network_manager::interfaces
+        - role::network_manager::vlans
 
-    - ansible.builtin.include_tasks: bonding.yml
+    - name: Setup bonding
+      ansible.builtin.include_tasks: bonding.yml
       tags:
         - role::network_manager::bonding
 
-    - ansible.builtin.include_tasks: mtu.yml
+    - name: Setup mtu
+      ansible.builtin.include_tasks: mtu.yml
       tags:
         - role::network_manager::mtu
 
-    - ansible.builtin.include_tasks: clean_arp.yml
+    - name: Setup arp
+      ansible.builtin.include_tasks: arp.yml
       tags:
-        - role::network_manager::service
+        - role::network_manager::arp
   tags:
-    - role::network_interfaces
+    - role::network_manager

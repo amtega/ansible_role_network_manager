@@ -1,11 +1,16 @@
 ---
-# Role default lower priority variables
 
 # General network config
 
 network_manager_hostname: "{{ inventory_hostname }}"
-network_interfaces_gateway: "{{ ansible_facts.default_ipv4.gateway }}"
-network_manager_gateway_interface: "{{ network_interfaces[0].logicalname }}"
+
+network_manager_gateway: >-
+  {{ network_interfaces_gateway
+     | default(ansible_facts.default_ipv4.gateway) }}
+
+network_manager_gateway_interface: >-
+  {{ network_manager_interfaces[0].logicalname }}
+
 network_manager_ipv6: no
 
 # DNS config
@@ -62,4 +67,4 @@ network_manager_dns_options: []
 #   bond: no
 # }
 
-network_interfaces: []
+network_interfaces: "{{ network_interfaces | default([]) }}"

@@ -5,4 +5,4 @@
   gather_facts: no
   become: yes
   roles:
-    - amtega.network_interfaces
+    - amtega.network_manager

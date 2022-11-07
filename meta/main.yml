@@ -1,8 +1,7 @@
 ---
-# Role dependencies
 
 galaxy_info:
-  role_name: network_interfaces
+  role_name: network_manager
   namespace: amtega
   author: José Enrique Mourón Regueira / Juan Antonio Valiño García
   description: Configure ipv4 network interfaces
@@ -20,6 +19,7 @@ galaxy_info:
         - "35"
   galaxy_tags:
     - network
+    - networkmanager
     - interfaces
     - ipv4
 
